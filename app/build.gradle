@@ -48,6 +48,8 @@ dependencies {
     // Google Sign In
     compile "com.google.android.gms:play-services-auth:$playVersion"
     compile "com.google.firebase:firebase-database:$playVersion"
+    compile "com.google.firebase:firebase-auth:$playVersion"
+
 
 }
 
