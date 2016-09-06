@@ -30,6 +30,12 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +56,11 @@ public class MainActivity extends AppCompatActivity {
 
     // Firebase instance variables
     // TODO: Add FirebaseDatabase variable
+    private FirebaseDatabase mFirebaseDatabase;
+
     // TODO: Add DatabaseReference variable
+    private DatabaseReference mDatabaseReference;
+
     // TODO: Add FirebaseAuth variable
     // TODO: Add FirebaseStorage variable
     // TODO: Add StorageReference variable
@@ -60,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
 
         mUsername = ANONYMOUS;
 
@@ -112,9 +125,41 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: Send messages on click
+                FriendlyMessage friendlyMessage =
+                        new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, null);
+                mDatabaseReference.child("messages").push().setValue(friendlyMessage);
 
                 // Clear input box
                 mMessageEditText.setText("");
+            }
+        });
+
+        mDatabaseReference.child("messages").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                // Get the chat message from the snapshot and add it to the UI
+                FriendlyMessage message = dataSnapshot.getValue(FriendlyMessage.class);
+                mMessageAdapter.add(message);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }
