@@ -16,6 +16,7 @@
 package com.google.firebase.udacity.friendlychat;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +38,7 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -44,6 +46,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     private static final String TAG = "MainActivity";
 
     public static final String ANONYMOUS = "anonymous";
+    private static final int RC_PHOTO_PICKER = 1;
 
     private ListView mMessageListView;
     private MessageAdapter mMessageAdapter;
@@ -65,18 +71,21 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     private String mPhotoUrl;
 
     // Firebase instance variables
-    // TODO: Add FirebaseDatabase variable
+    // FirebaseDatabase variable
     private FirebaseDatabase mFirebaseDatabase;
 
-    // TODO: Add DatabaseReference variable
+    // DatabaseReference variable
     private DatabaseReference mDatabaseReference;
 
-    // TODO: Add FirebaseAuth variable
+    // FirebaseAuth variable
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
 
-    // TODO: Add FirebaseStorage variable
-    // TODO: Add StorageReference variable
+    // FirebaseStorage variable
+    // StorageReference variable
+    private FirebaseStorage mFirebaseStorage;
+    private StorageReference mStorageReference;
+
     // TODO: Add FirebaseRemoteConfig variable
 
     private GoogleApiClient mGoogleApiClient;
@@ -116,7 +125,11 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Fire an intent to show an image picker
+                // Fire an intent to show an image picker
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
             }
         });
 
@@ -184,6 +197,10 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             }
         });
 
+        // Initialize Firebase components
+        mFirebaseStorage = FirebaseStorage.getInstance();
+        mStorageReference = mFirebaseStorage.getReference();
+
     }
 
     @Override
@@ -242,5 +259,29 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
+            Uri selectedImageUri = data.getData();
+
+            // Get a reference to the location where we'll store our photos
+            mStorageReference = mFirebaseStorage.getReference("Photos");
+
+            // Get a reference to store file at chat_photos/<FILENAME>
+            StorageReference photoRef = mStorageReference.child(selectedImageUri.getLastPathSegment());
+
+            // Upload file to Firebase Storage
+            photoRef.putFile(selectedImageUri)
+                    .addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // When the image has successfully uploaded, we get its download URL
+                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                            // Set the download URL to the message box, so that the user can send it to the database
+                            FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, downloadUrl.toString());
+                            mDatabaseReference.child("messages").push().setValue(friendlyMessage);
+                        }
+                    });
+        }
     }
 }
