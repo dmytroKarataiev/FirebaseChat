@@ -1,17 +1,26 @@
-/**
- * Copyright Google Inc. All Rights Reserved.
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * MIT License
+ *
+ * Copyright (c) 2016. Dmytro Karataiev.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
 package com.google.firebase.udacity.friendlychat;
 
@@ -53,11 +62,17 @@ import com.google.firebase.storage.UploadTask;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MainActivity with the Apps logic. Connects to the database, retrieves data, etc.
+ */
 public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
 
     public static final String ANONYMOUS = "anonymous";
+    public static final String MESSAGES = "messages";
+    public static final String PHOTOS = "photos";
+
     private static final int RC_PHOTO_PICKER = 1;
 
     private ListView mMessageListView;
@@ -161,14 +176,14 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
                 // TODO: Send messages on click
                 FriendlyMessage friendlyMessage =
                         new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, null);
-                mDatabaseReference.child("messages").push().setValue(friendlyMessage);
+                mDatabaseReference.child(MESSAGES).push().setValue(friendlyMessage);
 
                 // Clear input box
                 mMessageEditText.setText("");
             }
         });
 
-        mDatabaseReference.child("messages").addChildEventListener(new ChildEventListener() {
+        mDatabaseReference.child(MESSAGES).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // Get the chat message from the snapshot and add it to the UI
@@ -266,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             Uri selectedImageUri = data.getData();
 
             // Get a reference to the location where we'll store our photos
-            mStorageReference = mFirebaseStorage.getReference("Photos");
+            mStorageReference = mFirebaseStorage.getReference(PHOTOS);
 
             // Get a reference to store file at chat_photos/<FILENAME>
             StorageReference photoRef = mStorageReference.child(selectedImageUri.getLastPathSegment());
@@ -279,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
                             Uri downloadUrl = taskSnapshot.getDownloadUrl();
                             // Set the download URL to the message box, so that the user can send it to the database
                             FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, downloadUrl.toString());
-                            mDatabaseReference.child("messages").push().setValue(friendlyMessage);
+                            mDatabaseReference.child(MESSAGES).push().setValue(friendlyMessage);
                         }
                     });
         }
