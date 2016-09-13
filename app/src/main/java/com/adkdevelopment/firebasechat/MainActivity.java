@@ -22,7 +22,8 @@
  * SOFTWARE.
  *
  */
-package com.google.firebase.udacity.friendlychat;
+
+package com.adkdevelopment.firebasechat;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -65,7 +66,8 @@ import java.util.List;
 /**
  * MainActivity with the Apps logic. Connects to the database, retrieves data, etc.
  */
-public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity
+        implements FirebaseAuth.AuthStateListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
 
@@ -110,6 +112,36 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setUi();
+
+        setFirebase();
+    }
+
+    /**
+     * Helper method to set up all UI-related work.
+     */
+    private void setUi() {
+        // Initialize references to views
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mMessageListView = (ListView) findViewById(R.id.messageListView);
+        mPhotoPickerButton = (ImageButton) findViewById(R.id.photoPickerButton);
+        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
+        mSendButton = (Button) findViewById(R.id.sendButton);
+
+        // Initialize message ListView and its adapter
+        List<ChatMessage> chatMessages = new ArrayList<>();
+        mMessageAdapter = new MessageAdapter(this, R.layout.item_message, chatMessages);
+        mMessageListView.setAdapter(mMessageAdapter);
+
+        // Initialize progress bar
+        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+    }
+
+    /**
+     * Helper method to set up all Firebase related work
+     * and actions on firebase functions.
+     */
+    private void setFirebase() {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -120,21 +152,6 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .build();
-
-        // Initialize references to views
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mMessageListView = (ListView) findViewById(R.id.messageListView);
-        mPhotoPickerButton = (ImageButton) findViewById(R.id.photoPickerButton);
-        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
-        mSendButton = (Button) findViewById(R.id.sendButton);
-
-        // Initialize message ListView and its adapter
-        List<FriendlyMessage> friendlyMessages = new ArrayList<>();
-        mMessageAdapter = new MessageAdapter(this, R.layout.item_message, friendlyMessages);
-        mMessageListView.setAdapter(mMessageAdapter);
-
-        // Initialize progress bar
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
 
         // ImagePickerButton shows an image picker to upload a image for a message
         mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
@@ -173,10 +190,10 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Send messages on click
-                FriendlyMessage friendlyMessage =
-                        new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, null);
-                mDatabaseReference.child(MESSAGES).push().setValue(friendlyMessage);
+                // Send messages on click
+                ChatMessage chatMessage =
+                        new ChatMessage(mMessageEditText.getText().toString(), mUsername, null);
+                mDatabaseReference.child(MESSAGES).push().setValue(chatMessage);
 
                 // Clear input box
                 mMessageEditText.setText("");
@@ -187,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // Get the chat message from the snapshot and add it to the UI
-                FriendlyMessage message = dataSnapshot.getValue(FriendlyMessage.class);
+                ChatMessage message = dataSnapshot.getValue(ChatMessage.class);
                 mMessageAdapter.add(message);
             }
 
@@ -215,14 +232,13 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         // Initialize Firebase components
         mFirebaseStorage = FirebaseStorage.getInstance();
         mStorageReference = mFirebaseStorage.getReference();
-
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        // Check if user is signed in.
         mFirebaseAuth.addAuthStateListener(this);
-        // TODO: Check if user is signed in.
     }
 
     @Override
@@ -264,7 +280,8 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             finish();
         } else {
             mUsername = mFirebaseUser.getDisplayName();
-            mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
+            mPhotoUrl = mFirebaseUser.getPhotoUrl() !=
+                    null ? mFirebaseUser.getPhotoUrl().toString() : null;
         }
     }
 
@@ -291,10 +308,11 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
                     .addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             // When the image has successfully uploaded, we get its download URL
-                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                            String downloadUrl = taskSnapshot.getDownloadUrl() !=
+                                    null ? taskSnapshot.getDownloadUrl().toString() : null;
                             // Set the download URL to the message box, so that the user can send it to the database
-                            FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, downloadUrl.toString());
-                            mDatabaseReference.child(MESSAGES).push().setValue(friendlyMessage);
+                            ChatMessage chatMessage = new ChatMessage(null, mUsername, downloadUrl);
+                            mDatabaseReference.child(MESSAGES).push().setValue(chatMessage);
                         }
                     });
         }

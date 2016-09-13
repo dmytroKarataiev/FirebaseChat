@@ -1,5 +1,5 @@
 # Firebase Chat Application
-Simple app which shows usage of Google's Firebase technologies (database, file storage, permissions, login).
+Simple app which shows usage of Google's Firebase technologies (database, file storage, permissions, login, remote config).
 
 ## Technologies
 * Google Firebase storage, database, permissions, login, remote config.

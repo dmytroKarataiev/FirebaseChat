@@ -22,7 +22,8 @@
  * SOFTWARE.
  *
  */
-package com.google.firebase.udacity.friendlychat;
+
+package com.adkdevelopment.firebasechat;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -60,7 +61,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private GoogleApiClient mGoogleApiClient;
 
     // Firebase instance variables
-    // TODO: Add FirebaseAuth variable
+    // Add FirebaseAuth variable
     private FirebaseAuth mFirebaseAuth;
 
     @Override
@@ -75,7 +76,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         mSignInButton.setOnClickListener(this);
 
         // Configure Google Sign In
-        // TODO: Google Sign In with GoogleSignInOptions and GoogleApiClient
+        // Google Sign In with GoogleSignInOptions and GoogleApiClient
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(
                 GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -86,8 +87,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
         // Initialize FirebaseAuth
-        // TODO: Initialize FirebaseAuth
         mFirebaseAuth = FirebaseAuth.getInstance();
     }
 
@@ -116,7 +117,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
 
-    // TODO: Override onActivityResult
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -136,7 +136,10 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    // TODO: Implement firebaseAuthWithgoogle(GoogleSignInAccount account)
+    /**
+     * Authentification with Google.
+     * @param acct Google Sign In account.
+     */
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);

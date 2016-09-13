@@ -23,7 +23,7 @@
  *
  */
 
-package com.google.firebase.udacity.friendlychat;
+package com.adkdevelopment.firebasechat;
 
 import android.app.Activity;
 import android.content.Context;
@@ -41,9 +41,9 @@ import java.util.List;
 /**
  * Adapter which shows either photos or messages from a Firebase database.
  */
-public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
+public class MessageAdapter extends ArrayAdapter<ChatMessage> {
 
-    public MessageAdapter(Context context, int resource, List<FriendlyMessage> objects) {
+    public MessageAdapter(Context context, int resource, List<ChatMessage> objects) {
         super(context, resource, objects);
     }
 
@@ -51,28 +51,39 @@ public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
-            convertView = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.item_message, parent, false);
+            convertView = ((Activity) getContext()).getLayoutInflater()
+                    .inflate(R.layout.item_message, parent, false);
         }
 
         ImageView photoImageView = (ImageView) convertView.findViewById(R.id.photoImageView);
         TextView messageTextView = (TextView) convertView.findViewById(R.id.messageTextView);
         TextView authorTextView = (TextView) convertView.findViewById(R.id.nameTextView);
 
-        FriendlyMessage message = getItem(position);
+        ChatMessage message = getItem(position);
 
-        boolean isPhoto = message.getPhotoUrl() != null;
+        String photoUrl, name, text;
+        photoUrl = name = text = null;
+
+        if (message != null) {
+            photoUrl = message.getPhotoUrl();
+            name = message.getName();
+            text = message.getText();
+        }
+
+        boolean isPhoto = photoUrl != null;
+
         if (isPhoto) {
             messageTextView.setVisibility(View.GONE);
             photoImageView.setVisibility(View.VISIBLE);
             Glide.with(photoImageView.getContext())
-                    .load(message.getPhotoUrl())
+                    .load(photoUrl)
                     .into(photoImageView);
         } else {
             messageTextView.setVisibility(View.VISIBLE);
             photoImageView.setVisibility(View.GONE);
-            messageTextView.setText(message.getText());
+            messageTextView.setText(text);
         }
-        authorTextView.setText(message.getName());
+        authorTextView.setText(name);
 
         return convertView;
     }
