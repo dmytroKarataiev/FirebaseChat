@@ -76,6 +76,8 @@ dependencies {
     compile "com.google.firebase:firebase-database:$playVersion"
     compile "com.google.firebase:firebase-auth:$playVersion"
     compile "com.google.firebase:firebase-storage:$playVersion"
+    compile "com.google.firebase:firebase-messaging:$playVersion"
+    compile "com.google.firebase:firebase-config:$playVersion"
 
 }
 
