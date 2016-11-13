@@ -68,6 +68,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * MainActivity with the Apps logic. Connects to the database, retrieves data, etc.
  */
@@ -122,6 +124,10 @@ public class MainActivity extends AppCompatActivity
         setUi();
 
         setFirebase();
+
+        if (getIntent() != null) {
+            Log.v(TAG, getIntent().toString());
+        }
     }
 
     /**

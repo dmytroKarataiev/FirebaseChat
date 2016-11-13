@@ -1,11 +1,11 @@
 # Firebase Chat Application
-Simple app which shows usage of Google's Firebase technologies (database, file storage, permissions, login, remote config).
+This chat application shows usage of Google's Firebase technologies (database, file storage, permissions, login, remote config, etc).
 
 ## Technologies
 * Google Firebase storage, database, permissions, login, remote config.
 
 ## Credits
-* [Udacity's Firebase Course]().
+* [Udacity's Firebase Course](https://www.udacity.com/course/firebase-in-a-weekend-by-google-android--ud0352).
 
 License
 -------
